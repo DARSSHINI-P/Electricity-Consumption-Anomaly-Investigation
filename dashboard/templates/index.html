@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Driven Electricity Consumption Anomaly Detection and Investigation</title>
+  <meta name="description" content="Big Data + Anomaly Detection + Agentic AI Decision Support for Electricity Utilities">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation & Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-branding">
+        <div class="logo-badge">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <div>
+          <h1 class="header-title">AI-Driven Electricity Consumption Anomaly Detection and Investigation</h1>
+          <p class="header-subtitle">Big Data + Anomaly Detection + Agentic AI Decision Support</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <span class="badge badge-academic">Academic Research Prototype</span>
+        <span class="badge badge-system">Isolation Forest + Agentic AI</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ethical & Verification Limitation Notice -->
+  <section class="limitation-banner">
+    <div class="banner-inner">
+      <svg class="icon-alert" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <div>
+        <strong>Critical System Notice:</strong>
+        This system identifies potentially suspicious consumption patterns and anomalous deviations.
+        <em>An anomaly does not prove electricity theft.</em> Human and technical field verifications are required before taking administrative or legal action.
+      </div>
+    </div>
+  </section>
+
+  <main class="main-content">
+    {% if not data_ready %}
+    <!-- Data Processing Required State -->
+    <div class="empty-state-card">
+      <div class="empty-state-icon">⚡</div>
+      <h2>Processed Dataset Not Detected</h2>
+      <p>The system requires aggregated daily telemetry and Isolation Forest anomaly inference results.</p>
+      <div class="instruction-box">
+        <code>python run.py --process</code>
+      </div>
+      <p class="text-muted">This processes 15-minute readings into daily baselines, calculates rolling features, and trains the Isolation Forest detector.</p>
+      <form action="/api/trigger-process" method="POST" id="processForm">
+        <button type="submit" class="btn btn-primary" id="processBtn">
+          <span>Run Pipeline Now</span>
+        </button>
+      </form>
+    </div>
+    {% else %}
+
+    <!-- Metric Summary Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">Total Meters Monitored</span>
+          <span class="metric-icon">🔌</span>
+        </div>
+        <div class="metric-value">{{ total_meters }}</div>
+        <div class="metric-subtext">Active telemetry channels (MT_001 – MT_005)</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">Observed Time Horizon</span>
+          <span class="metric-icon">📅</span>
+        </div>
+        <div class="metric-value">{{ total_days }} <span class="unit">Days</span></div>
+        <div class="metric-subtext">Aggregated from 15-minute interval readings</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-title">Total Anomalies Flagged</span>
+          <span class="metric-icon">⚠️</span>
+        </div>
+        <div class="metric-value">{{ total_anomalies }}</div>
+        <div class="metric-subtext">Detected via Isolation Forest (-1 prediction)</div>
+      </div>
+
+      <div class="metric-card card-accent-high">
+        <div class="metric-header">
+          <span class="metric-title">High Priority Cases</span>
+          <span class="metric-icon">🚨</span>
+        </div>
+        <div class="metric-value text-danger">{{ high_priority_count }}</div>
+        <div class="metric-subtext">Acute deviation (&ge;50% drop/surge or score &ge;0.14)</div>
+      </div>
+    </div>
+
+    <!-- Interactive Telemetry Trend Chart -->
+    <div class="chart-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Daily Electricity Consumption Trend & Anomaly Telemetry</h2>
+          <p class="panel-subtitle">Longitudinal time series with historical baseline and automated anomaly flags</p>
+        </div>
+        <div class="meter-selector-wrapper">
+          <label for="meterSelect" class="selector-label">Active Meter:</label>
+          <select id="meterSelect" class="meter-select">
+            {% for m in meters %}
+            <option value="{{ m }}" {% if m == selected_meter %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="chart-canvas-container">
+        <canvas id="consumptionChart"></canvas>
+      </div>
+      <div class="chart-legend-custom">
+        <span class="legend-item"><span class="dot dot-blue"></span> Daily Consumption (kWh)</span>
+        <span class="legend-item"><span class="dot dot-purple"></span> Historical Average Baseline</span>
+        <span class="legend-item"><span class="dot dot-cyan"></span> 7-Day Rolling Average</span>
+        <span class="legend-item"><span class="dot dot-red"></span> Flagged Anomaly (Click to Investigate)</span>
+      </div>
+    </div>
+
+    <!-- Anomalous Consumption Cases Table -->
+    <div class="table-panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">Detected Anomalous Consumption Cases</h2>
+          <p class="panel-subtitle">Prioritized decision-support triage queue for utility inspectors</p>
+        </div>
+        <div class="table-filters">
+          <input type="text" id="tableSearch" class="search-input" placeholder="Search meter or date...">
+          <select id="priorityFilter" class="filter-select">
+            <option value="ALL">All Priorities</option>
+            <option value="HIGH">High Priority Only</option>
+            <option value="MEDIUM">Medium Priority Only</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="anomaly-table" id="anomaliesTable">
+          <thead>
+            <tr>
+              <th>Meter ID</th>
+              <th>Date</th>
+              <th>Consumption (kWh)</th>
+              <th>Historical Average (kWh)</th>
+              <th>Percentage Change</th>
+              <th>Anomaly Score</th>
+              <th>Priority</th>
+              <th class="text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in anomalies %}
+            <tr class="anomaly-row" data-meter="{{ a.meter_id }}" data-date="{{ a.date }}" data-priority="{{ a.priority }}">
+              <td class="font-mono font-medium">{{ a.meter_id }}</td>
+              <td class="font-mono text-muted">{{ a.date }}</td>
+              <td><strong>{{ "%.2f"|format(a.consumption) }}</strong></td>
+              <td class="text-muted">{{ "%.2f"|format(a.historical_average) }}</td>
+              <td>
+                {% if a.percentage_change < 0 %}
+                <span class="pct-badge pct-negative">{{ "%.1f"|format(a.percentage_change) }}%</span>
+                {% else %}
+                <span class="pct-badge pct-positive">+{{ "%.1f"|format(a.percentage_change) }}%</span>
+                {% endif %}
+              </td>
+              <td class="font-mono">{{ "%.4f"|format(a.anomaly_score) }}</td>
+              <td>
+                {% if a.priority == 'HIGH' %}
+                <span class="badge badge-priority-high">HIGH</span>
+                {% elif a.priority == 'MEDIUM' %}
+                <span class="badge badge-priority-medium">MEDIUM</span>
+                {% else %}
+                <span class="badge badge-priority-normal">NORMAL</span>
+                {% endif %}
+              </td>
+              <td class="text-right">
+                <a href="/investigate/{{ a.meter_id }}/{{ a.date }}" class="btn btn-sm btn-investigate">
+                  Investigate &rarr;
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer">
+        <span>Showing <strong id="visibleCount">{{ anomalies|length }}</strong> anomalous cases</span>
+        <span class="text-muted">Sorted by severity rank and decision-function distance</span>
+      </div>
+    </div>
+    {% endif %}
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <strong>Electricity Distribution Analytics Decision-Support Prototype</strong>
+        <p>Big Data Processing Pipeline &bull; Scikit-Learn Isolation Forest &bull; Agentic AI Forensic Engine</p>
+      </div>
+      <div class="footer-note">
+        Dataset: UCI ElectricityLoadDiagrams20112014 &bull; Local Deterministic Reasoning
+      </div>
+    </div>
+  </footer>
+
+  <!-- Pass server data safely to JavaScript -->
+  <script>
+    window.INITIAL_CHART_DATA = {
+      labels: {{ chart_labels|default([])|tojson }},
+      consumption: {{ chart_consumption|default([])|tojson }},
+      baseline: {{ chart_baseline|default([])|tojson }},
+      rolling: {{ chart_rolling|default([])|tojson }},
+      anomalies: {{ chart_anomalies|default([])|tojson }},
+      selectedMeter: {{ selected_meter|default('MT_001')|tojson }}
+    };
+  </script>
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic AI Investigation: Meter {{ report.meter_id }} ({{ report.date }})</title>
+  <meta name="description" content="AI-Driven Forensic Investigation Report for Anomalous Electricity Consumption">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Top Navigation & Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-branding">
+        <a href="/" class="btn-back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Dashboard
+        </a>
+        <div class="header-divider"></div>
+        <div>
+          <h1 class="header-title">Agentic AI Investigation Report</h1>
+          <p class="header-subtitle">Case Dossier: {{ report.meter_id }} &bull; Incident Date: {{ report.date }}</p>
+        </div>
+      </div>
+      <div class="header-status">
+        {% if report.investigation_priority == 'HIGH' %}
+        <span class="badge badge-priority-high font-mono">PRIORITY: HIGH</span>
+        {% elif report.investigation_priority == 'MEDIUM' %}
+        <span class="badge badge-priority-medium font-mono">PRIORITY: MEDIUM</span>
+        {% else %}
+        <span class="badge badge-priority-normal font-mono">PRIORITY: NORMAL</span>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Critical Ethical & Regulatory Notice -->
+  <section class="limitation-banner banner-warning">
+    <div class="banner-inner">
+      <svg class="icon-alert" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <div>
+        <strong>System Limitation Notice:</strong>
+        {{ report.system_limitation }}
+      </div>
+    </div>
+  </section>
+
+  <main class="main-content">
+
+    <!-- Dossier Overview Card -->
+    <div class="investigation-card">
+      <div class="card-header-flex">
+        <div>
+          <span class="badge badge-subtle">FORENSIC TELEMETRY SNAPSHOT</span>
+          <h2 class="card-title-lg">Meter {{ report.meter_id }} Telemetry Assessment</h2>
+        </div>
+        <div class="target-date-box">
+          <span class="label">Incident Date</span>
+          <span class="value font-mono">{{ report.date }}</span>
+        </div>
+      </div>
+
+      <!-- Telemetry Parameters Matrix -->
+      <div class="params-matrix">
+        <div class="param-box">
+          <div class="param-label">Current Consumption</div>
+          <div class="param-value font-mono">{{ "%.2f"|format(report.current_consumption) }} <span class="unit">kWh</span></div>
+          <div class="param-sub">Incident day total</div>
+        </div>
+
+        <div class="param-box">
+          <div class="param-label">Historical Average</div>
+          <div class="param-value font-mono">{{ "%.2f"|format(report.historical_average) }} <span class="unit">kWh</span></div>
+          <div class="param-sub">Cumulative baseline mean</div>
+        </div>
+
+        <div class="param-box">
+          <div class="param-label">Percentage Change</div>
+          <div class="param-value font-mono {% if report.percentage_change < 0 %}text-danger{% else %}text-warning{% endif %}">
+            {% if report.percentage_change < 0 %}{{ "%.1f"|format(report.percentage_change) }}%{% else %}+{{ "%.1f"|format(report.percentage_change) }}%{% endif %}
+          </div>
+          <div class="param-sub">Relative to baseline</div>
+        </div>
+
+        <div class="param-box">
+          <div class="param-label">Anomaly Score</div>
+          <div class="param-value font-mono">{{ "%.4f"|format(report.anomaly_score) }}</div>
+          <div class="param-sub">Isolation Forest metric</div>
+        </div>
+
+        <div class="param-box param-box-highlight">
+          <div class="param-label">Investigation Priority</div>
+          <div class="param-value font-mono">
+            {% if report.investigation_priority == 'HIGH' %}
+            <span class="text-danger font-bold">HIGH</span>
+            {% elif report.investigation_priority == 'MEDIUM' %}
+            <span class="text-warning font-bold">MEDIUM</span>
+            {% else %}
+            <span class="text-success font-bold">NORMAL</span>
+            {% endif %}
+          </div>
+          <div class="param-sub">Algorithmic triage rank</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 1: Observed Pattern -->
+    <div class="investigation-section">
+      <div class="section-title-wrap">
+        <span class="section-num">01</span>
+        <h3 class="section-title">Observed Pattern</h3>
+      </div>
+      <div class="section-body">
+        <div class="pattern-callout">
+          <div class="callout-icon">🔍</div>
+          <div class="callout-text">
+            {{ report.observed_pattern }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Consumption Details & Statistical Context -->
+    <div class="investigation-section">
+      <div class="section-title-wrap">
+        <span class="section-num">02</span>
+        <h3 class="section-title">Consumption Details & Baseline Context</h3>
+      </div>
+      <div class="section-body">
+        <div class="details-grid">
+          <div class="detail-item">
+            <span class="detail-k">Recorded Consumption:</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.recorded_consumption }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Historical Baseline Average:</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.historical_baseline }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Absolute Deviation:</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.absolute_deviation }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Relative Change:</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.percentage_change }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Baseline Standard Deviation (&sigma;):</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.standard_deviation }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Standardized Z-Score:</span>
+            <span class="detail-v font-mono">
+              {% if report.consumption_details.z_score is not none %}
+              {{ report.consumption_details.z_score }}
+              {% else %}
+              N/A
+              {% endif %}
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-k">Total Historical Records for Meter:</span>
+            <span class="detail-v font-mono">{{ report.consumption_details.meter_total_days }} days</span>
+          </div>
+        </div>
+
+        {% if report.history_window %}
+        <!-- Recent Window Mini-Table -->
+        <h4 class="subheading">Surrounding 14-Day Trajectory</h4>
+        <div class="table-responsive">
+          <table class="history-mini-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Daily Consumption</th>
+                <th>Historical Baseline</th>
+                <th>Relative Deviation</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for h in report.history_window %}
+              <tr class="{% if h.is_target %}row-highlight-target{% endif %}">
+                <td class="font-mono">
+                  {{ h.date }}
+                  {% if h.is_target %}<span class="badge badge-target">INCIDENT</span>{% endif %}
+                </td>
+                <td class="font-mono"><strong>{{ "%.2f"|format(h.consumption) }} kWh</strong></td>
+                <td class="font-mono text-muted">{{ "%.2f"|format(h.historical_average) }} kWh</td>
+                <td>
+                  <span class="pct-mini {% if h.percentage_change < 0 %}pct-neg{% else %}pct-pos{% endif %}">
+                    {{ "%+.1f"|format(h.percentage_change) }}%
+                  </span>
+                </td>
+                <td>
+                  {% if h.is_target %}
+                  <span class="text-danger font-medium">Flagged Anomaly</span>
+                  {% else %}
+                  <span class="text-muted">Normal Telemetry</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Section 3: Possible Causes / Differential Hypotheses -->
+    <div class="investigation-section">
+      <div class="section-title-wrap">
+        <span class="section-num">03</span>
+        <h3 class="section-title">Plausible Causes & Engineering Hypotheses</h3>
+      </div>
+      <div class="section-body">
+        <p class="section-desc">The Agentic AI reasoning framework evaluated telemetry characteristics against utility distribution archetypes:</p>
+        
+        <div class="causes-grid">
+          {% for cause in report.possible_causes %}
+          <div class="cause-card">
+            <div class="cause-header">
+              <span class="cause-badge cause-{{ cause.category }}">{{ cause.category|replace('_', ' ')|upper }}</span>
+            </div>
+            <h4 class="cause-title">{{ cause.title }}</h4>
+            <p class="cause-desc">{{ cause.description }}</p>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Recommended Verification Actions -->
+    <div class="investigation-section">
+      <div class="section-title-wrap">
+        <span class="section-num">04</span>
+        <h3 class="section-title">Recommended Verification Actions</h3>
+      </div>
+      <div class="section-body">
+        <p class="section-desc">Recommended sequential action protocol for utility investigators and field inspection crews:</p>
+        
+        <div class="actions-list">
+          {% for act in report.recommended_actions %}
+          <div class="action-item">
+            <div class="action-step-num">Step {{ act.step }}</div>
+            <div class="action-content">
+              <h4 class="action-title">{{ act.type }}</h4>
+              <p class="action-desc">{{ act.detail }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="investigation-footer-actions">
+      <a href="/" class="btn btn-secondary btn-lg">
+        &larr; Back to Dashboard
+      </a>
+      <button onclick="window.print()" class="btn btn-outline btn-lg">
+        🖨️ Print Dossier / Export PDF
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div>
+        <strong>Electricity Distribution Analytics Decision-Support Prototype</strong>
+        <p>Big Data Processing Pipeline &bull; Scikit-Learn Isolation Forest &bull; Agentic AI Forensic Engine</p>
+      </div>
+      <div class="footer-note">
+        Confidential Utility Engineering Briefing &bull; Case {{ report.meter_id }}-{{ report.date }}
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
